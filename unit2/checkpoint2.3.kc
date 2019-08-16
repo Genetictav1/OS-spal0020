@@ -39,8 +39,8 @@ void syscall13() { exit_hypervisor(); }
 void syscall14() { exit_hypervisor(); }
 void syscall15() { exit_hypervisor(); } 
 void syscall16() { exit_hypervisor(); } 
-void securentr() { exit_hypervisor(); } 
-void securexit() { exit_hypervisor(); } 
+void SECURENTR() { exit_hypervisor(); } 
+void SECUREXIT() { exit_hypervisor(); } 
 void syscall19() { exit_hypervisor(); } 
 void syscall20() { exit_hypervisor(); } 
 void syscall21() { exit_hypervisor(); } 
@@ -115,17 +115,15 @@ while(true) {
 				*BGCOL = BLACK;
 				}
 		}
-	     }
+}
 
-void syscall1()
-	{
-	*(SCREEN+79) = ')';
-	}
-
-void syscall2()
-	{
-	*(SCREEN+78) = '(';
-	}
+void PAGFAULT() { exit_hypervisor(); } 
+void RESTORKEY() { exit_hypervisor(); } 
+void ALTTABKEY() { exit_hypervisor(); } 
+void VF011RD() { exit_hypervisor(); } 
+void VF011WR() { exit_hypervisor(); } 
+void undefined_trap() { exit_hypervisor(); } 
+void CPUKIL() { exit_hypervisor(); }
 
 #pragma data_seg(Syscall)
 
@@ -140,26 +138,28 @@ struct SysCall
 const char JMP = 0x4c;
 const char NOP = 0xea;
 
+
+
 export struct SysCall[] SYSCALLS = {
-{ JMP, &syscall0, NOP },
-{ JMP, &syscall1, NOP },
-{ JMP, &syscall2, NOP },
-{ JMP, &syscall3, NOP },
-{ JMP, &syscall4, NOP },
-{ JMP, &syscall5, NOP },
-{ JMP, &syscall6, NOP },
-{ JMP, &syscall7, NOP },
-{ JMP, &syscall8, NOP },
-{ JMP, &syscall9, NOP },
+{ JMP, &syscall00, NOP },
+{ JMP, &syscall01, NOP },
+{ JMP, &syscall02, NOP },
+{ JMP, &syscall03, NOP },
+{ JMP, &syscall04, NOP },
+{ JMP, &syscall05, NOP },
+{ JMP, &syscall06, NOP },
+{ JMP, &syscall07, NOP },
+{ JMP, &syscall08, NOP },
+{ JMP, &syscall09, NOP },
 { JMP, &syscall10, NOP },
-{ JMP, &SECURENTR, NOP },
-{ JMP, &SECUREXIT, NOP },
+{ JMP, &syscall11, NOP },
+{ JMP, &syscall12, NOP },
 { JMP, &syscall13, NOP },
 { JMP, &syscall14, NOP },
 { JMP, &syscall15, NOP },
 { JMP, &syscall16, NOP },
-{ JMP, &syscall17, NOP },
-{ JMP, &syscall18, NOP },
+{ JMP, &SECURENTR, NOP },
+{ JMP, &SECUREXIT, NOP },
 { JMP, &syscall19, NOP },
 { JMP, &syscall20, NOP },
 { JMP, &syscall21, NOP },
@@ -208,7 +208,7 @@ export struct SysCall[] SYSCALLS = {
 };
 
 export align(0x100) struct SysCall[] TRAPS = {
-	{ JMP, &main, NOP },
+	{ JMP, &reset, NOP },
 	{ JMP, &PAGFAULT, NOP },
 	{ JMP, &RESTORKEY, NOP },
 	{ JMP, &ALTTABKEY, NOP },
@@ -241,7 +241,7 @@ export align(0x100) struct SysCall[] TRAPS = {
 	{ JMP, &undefined_trap, NOP },
 	{ JMP, &undefined_trap, NOP },
 	{ JMP, &undefined_trap, NOP },
-	{ JMP, &undefined_trap NOP },
+	{ JMP, &undefined_trap, NOP },
 	{ JMP, &undefined_trap, NOP },
 	{ JMP, &undefined_trap, NOP },
 	{ JMP, &undefined_trap, NOP },
