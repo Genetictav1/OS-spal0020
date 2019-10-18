@@ -10,32 +10,10 @@ const char* COLS = 0xd800;
 const char BLACK = 0;
 const char WHITE = 1;
 
-unsigned char *current_screen_line = 0x0400;
-unsigned char current_screen_x = 0;
-
-
-char[] MESSAGE = "checkpoint 3.1 by spal0020";
+char[] MESSAGE = "checkpoint 4.1 by spal0020";
 
 void main() {
 
-}
-
-
-char *sc = current_screen_line;
-char *screenLocation = current_screen_line;
-
-void print_to_screen(char *message)
-{
-    while (*message)
-    {
-        *sc++ = *message++;
-    }
-}
-
-void print_new_line()
-{
-sc = screenLocation + 40;
-screenLocation = screenLocation + 40;
 }
 
 
@@ -43,8 +21,7 @@ void exit_hypervisor()
 { 
 	//Trigger exit from Hypervisor mode 
 	*(unsigned char *)$D67F = $01; 
-}
-
+} 
 void syscall00() { exit_hypervisor(); } 
 void syscall01() { exit_hypervisor(); } 
 void syscall02() { exit_hypervisor(); } 
@@ -111,9 +88,40 @@ void syscall62() { exit_hypervisor(); }
 void syscall63() { exit_hypervisor(); }
 
 
+void start_simple_program()
+
+{
+
+*(unsigned char *)$0300 = $80;
+*(unsigned char *)$0301 = $00;
+*(unsigned char *)$0302 = $81;
+*(unsigned char *)$0303 = $00;
+*(unsigned char *)$0304 = $00;
+*(unsigned char *)$0305 = $00;
+*(unsigned char *)$0306 = $00;
+*(unsigned char *)$0307 = $60;
+*(unsigned char *)$0308 = $02;
+*(unsigned char *)$0309 = $00;
+*(unsigned char *)$030A = $02;
+*(unsigned char *)$030B = $01;
+*(unsigned char *)$030C = $08;
+*(unsigned char *)$030D = $00;
+*(unsigned char *)$030E = $00;
+*(unsigned char *)$030F = $00;
+*(unsigned char *)$0310 = $60;
+*(unsigned char *)$D701 = $03;
+*(unsigned char *)$D702 = $00;
+*(unsigned char *)$D705 = $00;
+
+*(unsigned short *)$D648 = $080D;
+exit_hypervisor();
+
+}
+
 void reset()
 
 {
+
 
 *VIC_MEMORY = 0x14;
 
@@ -121,25 +129,28 @@ memset(SCREEN,' ', 40*25);
 
 memset(COLS, WHITE, 40*25);
 
-char* sc = SCREEN;
+char* sc = SCREEN+40;
 char* msg = MESSAGE;
 
-print_to_screen("spal0020 operating system starting...");
-print_new_line();
-print_to_screen("testing hardware");
-print_new_line();
-print_to_screen("test");
+while(*msg) {
+	*sc++ = *msg++;
+}
+
+start_simple_program();
 
 while(true) {
 	if(*RASTER==54 || *RASTER==66)
 		{
-		//*BGCOL = WHITE;
+		*BGCOL = WHITE;
 	     	}
 			else
 				{
-				//*BGCOL = BLACK;
+				*BGCOL = BLACK;
 				}
 		}
+
+
+
 }
 
 void PAGFAULT() { exit_hypervisor(); } 
