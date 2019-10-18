@@ -18,7 +18,7 @@ const char BLACK = 0;
 const char BLUE = 6;
 const char WHITE = 1;
 
-char[] MESSAGE = "checkpoint 5.2";
+char[] MESSAGE = "checkpoint 5.2 spal0020";
 
 const unsigned char STATE_NOTRUNNING = $00;
 const unsigned char STATE_RUNNING = $01;
@@ -166,10 +166,11 @@ void initialise_pdb(unsigned char pdb_number,char *name)
 {
   unsigned char i;
 
-  struct process_descriptor_block *p=(struct process_descriptor_block *)(((unsigned short)stored_pdbs)+(((unsigned short)pdb_number)<<8));
+  struct process_descriptor_block *p
+	=(struct process_descriptor_block *)(((unsigned short)stored_pdbs)+(((unsigned short)pdb_number)<<8));
 
   
-  p->process_id = next_free_pid;
+  p->process_id = next_free_pid();
 
   // Setup process name 
   // (32 bytes space for each to fit 16 chars + nul)
@@ -218,30 +219,6 @@ void exit_hypervisor()
 	*(char *)$D67F = $01;
 }
 
-
-
-    
-
-void PAGFAULT() { exit_hypervisor(); } 
-void RESTORKEY() { exit_hypervisor(); } 
-void ALTTABKEY() { exit_hypervisor(); } 
-void VF011RD() { exit_hypervisor(); } 
-void VF011WR() { exit_hypervisor(); } 
-void undefined_trap() { exit_hypervisor(); } 
-void CPUKIL() { exit_hypervisor(); }
-
-#pragma data_seg(Syscall)
-
-struct SysCall
-	{
-	char xjmp;
-	void()* syscall;
-	char xnop;
-	};
-
-
-const char JMP = 0x4c;
-const char NOP = 0xea;
 
 void syscall00() { exit_hypervisor(); } 
 void syscall01() { exit_hypervisor(); } 
@@ -342,6 +319,27 @@ while(true) {
 				}
 		}
 }
+
+void PAGFAULT() { exit_hypervisor(); } 
+void RESTORKEY() { exit_hypervisor(); } 
+void ALTTABKEY() { exit_hypervisor(); } 
+void VF011RD() { exit_hypervisor(); } 
+void VF011WR() { exit_hypervisor(); } 
+void undefined_trap() { exit_hypervisor(); } 
+void CPUKIL() { exit_hypervisor(); }
+
+#pragma data_seg(Syscall)
+
+struct SysCall
+	{
+	char xjmp;
+	void()* syscall;
+	char xnop;
+	};
+
+
+const char JMP = 0x4c;
+const char NOP = 0xea;
 
 export struct SysCall[] SYSCALLS = {
 { JMP, &syscall00, NOP },
@@ -460,4 +458,4 @@ export align(0x100) struct SysCall[] TRAPS = {
 	{ JMP, &undefined_trap, NOP },
 	{ JMP, &undefined_trap, NOP },
 	{ JMP, &CPUKIL, NOP }
-	};
+};
